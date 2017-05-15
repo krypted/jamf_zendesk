@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://assets.zendesk.com/apps/sdk-assets/css/0/zendesk_garden.css" type="text/css">
+
+        <style>
+            html {
+                overflow-y: hidden;
+            }
+            #results {
+                word-wrap:break-word; 
+                display:inline-block;
+                width: 100%;
+                height: 200px;
+                margin-top: 5px;
+                border: 1px solid #AAAAAA;
+                padding: 2 2 2 2;
+                overflow-y: scroll;
+            }
+            input {
+                width: 100%;
+                font-size: 16px;
+                margin-top: 5px;
+            }
+            button {
+                width: 100%;
+                font-size: 16px;
+                margin-top: 5px;
+            }
+            select {
+                width: 100%;
+                font-size: 16px;
+            }
+        </style>
+
+    </head>
+    <body>
+        <select id="cat">
+            <option value="accounts/username/">Accounts By Username</option>
+            <option value="computers/match/">Computer By Keyword</option>
+            <option value="mobiledevices/match/">Mobile Devices By Keyword</option>
+            <option value="users/name/">Users by Username</option>
+        </select>
+        <input type="text" id="search_string" placeholder="Enter string..." />
+        <button onclick="doapicall();">Search</button>
+        
+        <div id="results">
+            Results will show up as json string. If any errors occur, the response text will be visible here.
+        </div>
+
+        <script type="text/javascript" src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script>
+            //Client
+            var client = ZAFClient.init();
+            client.invoke('resize', { width: '100%', height: '285px' });
+            
+            /*
+            //Get ticket requester mail
+            client.get('ticket').then(function(data) {
+                ticket = data['ticket']
+                console.log(ticket.requester.email);
+                findDevice(ticket.requester.email);
+            }).catch(function(error) {
+                console.log(error.toString());
+                console.log("Please email contact@cedrifjacob.com for help.")
+            });
+            
+            */
+
+            //Find Device
+            function doapicall(searchterm) {
+
+                var thecall = {
+                    url: 'https://{{setting.subdomain}}.jamfcloud.com/JSSResource/' + $("#cat").val() + $("#search_string").val(),
+                    headers: {"Authorization": "Basic {{setting.token}}"},
+                    secure: true,
+                    type: 'GET',
+                    dataType: 'json',
+                    cors: false
+                };
+
+                client.request(thecall).then(
+                    function(data) {
+                        console.log(data);
+                        
+                        //Show search results in #results
+                        var result_string = JSON.stringify(data);
+                        $("#results").text(result_string);
+
+                    },
+                    function(response) {
+                        console.error(response.responseText);
+                        console.log("Please email contact@cedrifjacob.com for help.")
+                        $("#results").text(response.responseText);
+                    }
+                );
+            }
+        </script>
+    </body>
+</html>
+
+
+
