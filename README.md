@@ -11,4 +11,4 @@ This Zendesk sidebar app gathers device information from Jamf Pro based on email
 Please submit bug reports to [Insert Link](). Pull requests are welcome.
 
 ### Screenshot(s):
-[put your screenshots down here.]
+...coming soon :)
