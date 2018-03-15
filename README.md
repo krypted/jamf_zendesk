@@ -1,4 +1,4 @@
-# App name
+# Jamf|Pro Zendesk Sidebar App
 
 This Zendesk sidebar app gathers device information from Jamf Pro based on email from submitted ticket.
 
