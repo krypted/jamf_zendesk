@@ -13,6 +13,9 @@ macOS:
 - Computer Name
 - Serial Number
 - Last Check-in
+- Custom Extension Attribute 1
+- Custom Extension Attribute 2
+- Custom Extension Attribute 3
 
 iOS:
 - Assigned User
