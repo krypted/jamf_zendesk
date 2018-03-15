@@ -24,7 +24,7 @@ iOS:
 - Serial Number
 - Last Check-in
 
-Please submit bug reports to [Insert Link](https://github.com/krypted/jamf_zendesk/issues). Pull requests are welcome.
+Please submit bug reports to [Issues](https://github.com/krypted/jamf_zendesk/issues). Pull requests are welcome.
 
 ### Setup:
 
