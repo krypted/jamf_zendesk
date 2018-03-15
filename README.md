@@ -8,7 +8,6 @@ This Zendesk sidebar app gathers device information from Jamf Pro based on email
 * If no devices or multiple devices are found, you will be prompted with a search bar to gather information based on a chosen search term and dropdown list.
 * If an iOS or macOS device is found based on email in ticket and email assigned in Jamf Pro, the device information will display in the sidebar.
 
-Default information gathered
 macOS:
 - Assigned User
 - Computer Name
