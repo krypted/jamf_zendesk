@@ -1,104 +1,222 @@
 <html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="https://assets.zendesk.com/apps/sdk-assets/css/0/zendesk_garden.css" type="text/css">
+<head>
+  <meta charset="utf-8">
+  <!-- http://garden.zendesk.com -->
+  <link rel="stylesheet" href="https://assets.zendesk.com/apps/sdk-assets/css/2/zendesk_garden.css" type="text/css">
+  <style>
+      html {
+          overflow-y: hidden;
+      }
+      #results {
+          word-wrap:break-word; 
+          display:inline-block;
+          width: 100%;
+          height: 200px;
+          margin-top: 5px;
+          border: 0px solid #AAAAAA;
+          padding: 2 2 2 2;
+          overflow-y: scroll;
+      }
+      input {
+          width: 100%;
+          font-size: 16px;
+          margin-top: 5px;
+      }
+      button {
+          width: 100%;
+          font-size: 16px;
+          margin-top: 5px;
+      }
+      select {
+          width: 100%;
+          font-size: 16px;
+      }
+  </style>
+</head>
+<body>
+  <div id="results">
+    Retrieving info from Jamf Pro...Please Wait!
+  </div>
+  <!-- https://github.com/zendesk/zendesk_app_framework_sdk -->
+  <script type="text/javascript" src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script>
+    // Initialise the Zendesk JavaScript API client
+    // https://developer.zendesk.com/apps/docs/apps-v2
+    var client = ZAFClient.init();
+    client.invoke('resize', { width: '100%', height: '200px' });
+    
+    // Function that does API call to Jamf based on selected variable from dropdown
+    function searchcall(searchterm) {
 
-        <style>
-            html {
-                overflow-y: hidden;
+        var thecall = {
+            url: 'https://{{setting.subdomain}}.jamfcloud.com/JSSResource/' + $("#cat").val() + $("#search_string").val(),
+            headers: {"Authorization": "Basic {{setting.token}}"},
+            secure: true,
+            type: 'GET',
+            dataType: 'json',
+            cors: false
+        };
+
+        client.request(thecall).then(
+        	// If found, show response
+            function(data) {
+                var result_string = JSON.stringify(data);
+                $("#results").text(result_string);
+            },
+
+            // If not found, show error
+            function(response) {
+                console.error(response.responseText);
+                console.log("Please reach out to IT for help.")
+                $("#results").text("Nothing found, please refresh the page and try agian!");
             }
-            #results {
-                word-wrap:break-word; 
-                display:inline-block;
-                width: 100%;
-                height: 200px;
-                margin-top: 5px;
-                border: 1px solid #AAAAAA;
-                padding: 2 2 2 2;
-                overflow-y: scroll;
+        );
+    }
+
+    // Parse ticket for email submitted
+    function doapicall() {  
+    	client.get('ticket.requester.email').then(
+          function(data) {
+          var useremail = data['ticket.requester.email'];
+          requestUserInfo(client, useremail);
+      	}
+    );
+
+    // API search for email found in ticket
+    function requestUserInfo(client, useremail) {
+      var compsearchcall = {
+          url: 'https://{{setting.subdomain}}.jamfcloud.com/JSSResource/users/email/' + useremail,
+          headers: {"Authorization": "Basic {{setting.token}}"},
+          secure: true,
+          type: 'GET',
+          dataType: 'json',
+          cors: false
+      };
+
+      client.request(compsearchcall).then(
+        function(data) {
+
+          // If multiple devices found for user
+          if ((data["users"][0]["links"][2]["mobile_device"]) && (data["users"][0]["links"][0]["computer"])){
+              
+              console.log("multiple");
+              client.metadata().then(function(metadata) {
+                var subdomain = metadata.settings["subdomain"];
+                $("#results").html(
+                  '<span style="font-weight:bold">Multiple Devices Found For User</span>' + "<br>" +
+                  '<a href="https://' + subdomain + '.jamfcloud.com/users.html?query=' + useremail + '" target="_blank">View User in Jamf Pro</a>' + "<br>" + "<br>" +
+                  '<select id="cat">' +
+                  '<option value="accounts/username/">Accounts By Username</option>' +
+                  '<option value="computers/match/">Computer By Keyword</option>' +
+                  '<option value="mobiledevices/match/">Mobile Devices By Keyword</option>' +
+                  '<option value="users/name/">Users by Username</option>' +
+                  '</select>' +
+                  '<input type="text" id="search_string" placeholder="Enter string..." />' +
+                  '<button onclick="searchcall()">Quick Search</button>'
+                  );
+              });
+
+            // If an iOS device found for user
+          } else if (data["users"][0]["links"][2]["mobile_device"]) {
+              
+              console.log("iOS");
+              var iosid = data["users"][0]["links"][2]["mobile_device"][0]["id"];
+              var thecall = {
+                url: 'https://{{setting.subdomain}}.jamfcloud.com/JSSResource/mobiledevices/id/' + iosid,
+                headers: {"Authorization": "Basic {{setting.token}}"},
+                secure: true,
+                type: 'GET',
+                dataType: 'json',
+                cors: false
+              };
+              
+              client.request(thecall).then(function(data) {
+                client.metadata().then(function(metadata) {
+                  var subdomain = metadata.settings["subdomain"];
+                  $("#results").html(
+                    '<span style="font-weight:bold">Assigned User:</span> ' +  useremail + "<br>" + 
+                    '<span style="font-weight:bold">iOS Device Name:</span> ' + data["mobile_device"]["general"]["name"] + "<br>" + 
+                    '<span style="font-weight:bold">iOS Device Type:</span> ' + data["mobile_device"]["general"]["model_display"] + "<br>" + 
+                    '<span style="font-weight:bold">Serial Number:</span> ' + data["mobile_device"]["general"]["serial_number"] + "<br>" + 
+                    '<span style="font-weight:bold">Last Check-in:</span> ' + data["mobile_device"]["general"]["last_inventory_update"] + "<br>" + 
+                    '<a href="https://' + subdomain + '.jamfcloud.com/mobiledevices.html?id=' + iosid + '&o=r" target="_blank">View Device in Jamf Pro</a>'
+                    );
+                });
+              }
+            );
+
+            // If a macOS device found for user  
+          } else if (data["users"][0]["links"][0]["computer"]){
+
+          	  console.log("macOS");
+              var compid = data["users"][0]["links"][0]["computer"][0]["id"];
+              var thecall = {
+                url: 'https://{{setting.subdomain}}.jamfcloud.com/JSSResource/computers/id/' + compid,
+                headers: {"Authorization": "Basic {{setting.token}}"},
+                secure: true,
+                type: 'GET',
+                dataType: 'json',
+                cors: false
+              };
+
+              client.request(thecall).then(function(data) {
+                client.metadata().then(function(metadata) {
+                  // Extension Attribute Jamf Pro ID 1 from "Zendesk Settings"
+                  var subdomain = metadata.settings["subdomain"];
+                  var obj = data["computer"]["extension_attributes"];
+
+                  // Extension Attribute Jamf Pro ID 1 from "Zendesk Settings"
+				  var att1 = obj.find(item=>item.id==metadata.settings["macOSEA1"]);
+				  // Extension Attribute Jamf Pro ID 2 from "Zendesk Settings"
+				  var att2 = obj.find(item=>item.id==metadata.settings["macOSEA2"]);
+				  // Extension Attribute Jamf Pro ID 2 from "Zendesk Settings"
+				  var att3 = obj.find(item=>item.id==metadata.settings["macOSEA3"]);
+
+                  $("#results").html(
+                    '<span style="font-weight:bold">Assigned User:</span> ' +  useremail + "<br>" + 
+                    '<span style="font-weight:bold">Computer Name: </span>' + data["computer"]["general"]["name"] + "<br>" + 
+                    '<span style="font-weight:bold">Serial Number: </span>' + data["computer"]["general"]["serial_number"] + "<br>" + 
+                    '<span style="font-weight:bold">Last Check-in: </span>' + data["computer"]["general"]["last_contact_time"] + "<br>" + 
+                    '<span style="font-weight:bold">' + att1["name"] + ': </span>' + att1["value"] + "<br>" +
+                    '<span style="font-weight:bold">' + att2["name"] + ': </span>' + att2["value"] + "<br>" +
+                    '<span style="font-weight:bold">' + att3["name"] + ': </span>' + att3["value"] + "<br>" + 
+                    '<a href="https://' + subdomain + '.jamfcloud.com/computers.html?id=' + compid + '&o=r" target="_blank">View Device in Jamf Pro</a>'
+                    );
+                });
+              }
+            );
+
+            // If no devices are found for user  
+          } else {
+
+              console.log("neither");
+              client.metadata().then(function(metadata) {
+                var subdomain = metadata.settings["subdomain"];
+                $("#results").html(
+                  '<span style="font-weight:bold">No Devices Found For User</span>' + "<br>" +
+                  '<a href="https://' + subdomain + '.jamfcloud.com/users.html?query=' + useremail + '" target="_blank">View User in Jamf Pro</a>' + "<br>" + "<br>" +
+                  '<select id="cat">' +
+                  '<option value="accounts/username/">Accounts By Username</option>' +
+                  '<option value="computers/match/">Computer By Keyword</option>' +
+                  '<option value="mobiledevices/match/">Mobile Devices By Keyword</option>' +
+                  '<option value="users/name/">Users by Username</option>' +
+                  '</select>' +
+                  '<input type="text" id="search_string" placeholder="Enter string..." />' +
+                  '<button onclick="searchcall()">Quick Search</button>'
+                  );
+              });
             }
-            input {
-                width: 100%;
-                font-size: 16px;
-                margin-top: 5px;
-            }
-            button {
-                width: 100%;
-                font-size: 16px;
-                margin-top: 5px;
-            }
-            select {
-                width: 100%;
-                font-size: 16px;
-            }
-        </style>
+        },
 
-    </head>
-    <body>
-        <select id="cat">
-            <option value="accounts/username/">Accounts By Username</option>
-            <option value="computers/match/">Computer By Keyword</option>
-            <option value="mobiledevices/match/">Mobile Devices By Keyword</option>
-            <option value="users/name/">Users by Username</option>
-        </select>
-        <input type="text" id="search_string" placeholder="Enter string..." />
-        <button onclick="doapicall();">Search</button>
-        
-        <div id="results">
-            Results will show up as json string. If any errors occur, the response text will be visible here.
-        </div>
+        function(response) {
+          console.error(response.responseText);
+        }
 
-        <script type="text/javascript" src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <script>
-            //Client
-            var client = ZAFClient.init();
-            client.invoke('resize', { width: '100%', height: '285px' });
-            
-            /*
-            //Get ticket requester mail
-            client.get('ticket').then(function(data) {
-                ticket = data['ticket']
-                console.log(ticket.requester.email);
-                findDevice(ticket.requester.email);
-            }).catch(function(error) {
-                console.log(error.toString());
-                console.log("Please email contact@cedrifjacob.com for help.")
-            });
-            
-            */
-
-            //Find Device
-            function doapicall(searchterm) {
-
-                var thecall = {
-                    url: 'https://{{setting.subdomain}}.jamfcloud.com/JSSResource/' + $("#cat").val() + $("#search_string").val(),
-                    headers: {"Authorization": "Basic {{setting.token}}"},
-                    secure: true,
-                    type: 'GET',
-                    dataType: 'json',
-                    cors: false
-                };
-
-                client.request(thecall).then(
-                    function(data) {
-                        console.log(data);
-                        
-                        //Show search results in #results
-                        var result_string = JSON.stringify(data);
-                        $("#results").text(result_string);
-
-                    },
-                    function(response) {
-                        console.error(response.responseText);
-                        console.log("Please email contact@cedrifjacob.com for help.")
-                        $("#results").text(response.responseText);
-                    }
-                );
-            }
-        </script>
-    </body>
+      );
+    };
+  }
+  doapicall()
+  </script>
+</body>
 </html>
-
-
-

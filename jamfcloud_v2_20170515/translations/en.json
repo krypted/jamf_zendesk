@@ -1,16 +1,8 @@
 {
   "app": {
-    "description": "View Your Jamf Pro Assets in ZenDesk.",
-    "name": "ZenJamf"
-  },
-  "loading": "Welcome to the Jamf Pro Integration with Zendesk",
-  "fetch": {
-    "done": "Good",
-    "fail": "failed to fetch information from the server"
-  },
-  "id": "ID",
-  "email": "Email",
-  "name": "Name",
-  "role": "Role",
-  "groups": "Groups"
+    "name": "Zen Tunes",
+    "short_description": "Play the famous zen tunes in your help desk.",
+    "long_description": "Play the famous zen tunes in your help desk and \n listen to the beats it has to offer.",
+    "installation_instructions": "Simply click install."
+  }
 }
