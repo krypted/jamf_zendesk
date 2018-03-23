@@ -36,4 +36,4 @@ Please submit bug reports to [Issues](https://github.com/krypted/jamf_zendesk/is
 - For macOS, in App Settings in Zendesk, you can add the ID's of 3 extension attributes to gather more information that is not default
 
 ### Screenshot(s):
-...coming soon :)
+![Screenshots](https://github.com/krypted/jamf_zendesk/blob/master/Screenshots.png)
