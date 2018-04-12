@@ -5,8 +5,8 @@ This Zendesk sidebar app gathers device information from Jamf Pro based on email
 
 ### Setup:
 
-* Upload the .zip to your Private Apps section of Zendesk
-* In the App Configuration settings ensure you supply:
+1. Upload the .zip to your Private Apps section of Zendesk
+2. In the App Configuration settings ensure you supply:
 - Your domain or FQDN (yourcompany.jamfcloud.com or servername.yourcompany.com)
 - Your full Jamf Pro URL (https://yourcompany.jamfcloud.com or https://servername.yourcompany.com:8443)
 - Base64 token without parenthesis (username:password)
