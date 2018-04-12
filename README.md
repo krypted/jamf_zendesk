@@ -2,17 +2,6 @@
 
 This Zendesk sidebar app gathers device information from Jamf Pro based on email from submitted ticket.
 
-
-### Setup:
-
-1. Upload the .zip to your Private Apps section of Zendesk
-2. In the App Configuration settings ensure you supply:
-- Your domain or FQDN (yourcompany.jamfcloud.com or servername.yourcompany.com)
-- Your full Jamf Pro URL (https://yourcompany.jamfcloud.com or https://servername.yourcompany.com:8443)
-- Base64 token without parenthesis (username:password)
-- (for macOS users) 3 extension attribute Jamf IDs for macOS devices
-
-
 ### The following information is displayed:
 
 * If an iOS or macOS device is found based on email in ticket and email assigned in Jamf Pro, the device information will display in the sidebar.
@@ -36,6 +25,16 @@ iOS:
 
 Please submit bug reports to [Issues](https://github.com/krypted/jamf_zendesk/issues). Pull requests are welcome.
 
+### Setup:
+
+1. Upload the .zip to your Private Apps section of Zendesk
+2. In the App Configuration settings ensure you supply:
+Your domain or FQDN (yourcompany.jamfcloud.com or servername.yourcompany.com)
+Your full Jamf Pro URL (https://yourcompany.jamfcloud.com or https://servername.yourcompany.com:8443)
+Base64 token without parenthesis (username:password)
+(for macOS users) 3 extension attribute Jamf IDs for macOS devices
+
+### Notes:
 - On-prem and Jamfcloud users!
 - Parses Zendesk ticket for email used to create ticket
 - Uses that email to find assigned devices in Jamf Pro
