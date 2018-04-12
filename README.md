@@ -29,10 +29,10 @@ Please submit bug reports to [Issues](https://github.com/krypted/jamf_zendesk/is
 
 1. Upload the .zip to your Private Apps section of Zendesk
 2. In the App Configuration settings ensure you supply:
-Your domain or FQDN (yourcompany.jamfcloud.com or servername.yourcompany.com)
-Your full Jamf Pro URL (https://yourcompany.jamfcloud.com or https://servername.yourcompany.com:8443)
-Base64 token without parenthesis (username:password)
-(for macOS users) 3 extension attribute Jamf IDs for macOS devices
+- Your domain or FQDN (yourcompany.jamfcloud.com or servername.yourcompany.com)
+- Your full Jamf Pro URL (https://yourcompany.jamfcloud.com or https://servername.yourcompany.com:8443)
+- Base64 token without parenthesis (username:password)
+- (for macOS users) 3 extension attribute Jamf IDs for macOS devices
 
 ### Notes:
 - On-prem and Jamfcloud users!
